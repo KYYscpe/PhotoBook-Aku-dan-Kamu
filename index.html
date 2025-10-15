@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Monitoring Listrik Sekolah</title>
+<meta name="color-scheme" content="dark light" />
+<!-- Chart.js via CDN untuk grafik -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#0b0e14; --panel:rgba(22,26,36,.8); --line:rgba(255,255,255,.08);
+  --text:#eaf0ff; --muted:#9aa4bd; --accent:#76f0cf; --accent2:#9db5ff;
+  --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+}
+:root.light{
+  --bg:#f4f6ff; --panel:rgba(255,255,255,.9); --line:rgba(0,15,40,.1);
+  --text:#081224; --muted:#47506a; --accent:#08bf8a; --accent2:#3754ff;
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{
+  font-family: ui-sans-serif,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text); background:
+    radial-gradient(1200px 600px at -10% -20%, rgba(118,240,207,.15), transparent 60%),
+    radial-gradient(1000px 520px at 110% 0%, rgba(157,181,255,.16), transparent 58%),
+    var(--bg);
+  min-height:100dvh;
+}
+
+/* header */
+.header{
+  position:sticky; top:0; z-index:10; backdrop-filter: blur(12px);
+  background:linear-gradient(180deg, rgba(11,14,20,.92), rgba(11,14,20,.55));
+  border-bottom:1px solid var(--line);
+}
+.wrap{max-width:1200px;margin:0 auto;padding:16px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;
+  background: linear-gradient(135deg,var(--accent),var(--accent2)); color:#0b0e14;font-weight:800}
+.title{margin:0}
+.header-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.btn, .input, select{
+  border:1px solid var(--line); background:var(--panel); color:var(--text);
+  padding:10px 12px; border-radius:12px; box-shadow:var(--shadow); cursor:pointer
+}
+.input{min-width:220px} .btn:hover{border-color:var(--accent)}
+
+/* grid */
+main{max-width:1200px;margin:18px auto;padding:0 16px 28px}
+.grid{display:grid; gap:16px}
+.grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1000px){ .grid.cols-4{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:640px){ .grid.cols-4{grid-template-columns:1fr} }
+
+.card{
+  background:linear-gradient(180deg,var(--panel),color-mix(in oklab,var(--panel),transparent 8%));
+  border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden
+}
+.card-header{
+  display:flex;align-items:center;gap:10px;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--line)
+}
+.card-body{padding:14px}
+
+/* stat */
+.stat{
+  display:flex;align-items:center;gap:12px;padding:14px
+}
+.stat .dot{width:12px;height:12px;border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent2))}
+.stat .label{color:var(--muted);font-size:.9rem}
+.stat .value{font-size:1.6rem;font-weight:700}
+
+/* table */
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:600}
+
+/* alert */
+.alert{
+  border:1px solid color-mix(in oklab,var(--accent),#fff 20%); border-radius:12px;
+  padding:12px; background:linear-gradient(180deg, rgba(118,240,207,.07), transparent 50%); margin-bottom:8px
+}
+small{color:var(--muted)}
+footer{color:var(--muted);text-align:center;padding:24px 12px 40px;border-top:1px solid var(--line);margin-top:22px}
+@media print{ .header,.header-actions,#modeInfo{display:none!important} body{background:#fff;color:#000} .card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo">EL</div>
+      <div>
+        <h1 class="title">Dashboard Monitoring Listrik Sekolah</h1>
+        <small id="modeInfo">Mode: <b>DEMO (simulasi data)</b></small>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="toggleTheme" class="btn">Tema Gelap/Terang</button>
+      <select id="roomSelect">
+        <option value="ALL">Semua Ruang</option>
+      </select>
+      <button id="exportCsv" class="btn">Ekspor CSV</button>
+      <button id="printBtn" class="btn">Cetak / PDF</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Stats -->
+  <section class="grid cols-4">
+    <div class="card">
+      <div class="card-header"><strong>Daya Saat Ini</strong><small id="tsNow">—</small></div>
+      <div class="stat"><div class="dot"></div><div><div class="label">Power (W)</div><div class="value" id="pNow">0</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><strong>Arus & Tegangan</strong></div>
+      <div class="card-body">
+        <div class="grid cols-4" style="grid-template-columns:1fr 1fr">
+          <div class="stat"><div class="dot"></div><div><div class="label">Current</div><div class="value" id="iNow">0 A</div></div></div>
+          <div class="stat"><div class="dot"></div><div><div class="label">Voltage</div><div class="value" id="vNow">0 V</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><strong>Faktor Daya</strong></div>
+      <div class="stat"><div class="dot"></div><div><div class="label">Power Factor</div><div class="value" id="pfNow">0.00</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><strong>Energi</strong></div>
+      <div class="stat"><div class="dot"></div><div><div class="label">kWh (akumulasi)</div><div class="value" id="kwhNow">0.000</div></div></div>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="grid cols-4" style="grid-template-columns:2fr 1fr">
+    <div class="card">
+      <div class="card-header"><strong>Grafik Daya Real-time</strong>
+        <div><small>Interval: <span id="intervalLabel">1s</span></small></div>
+      </div>
+      <div class="card-body">
+        <canvas id="lineChart" height="140"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><strong>Penggunaan per Ruang (W)</strong></div>
+      <div class="card-body"><canvas id="barChart" height="140"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Table + Alerts -->
+  <section class="grid cols-4" style="grid-template-columns:2fr 1fr">
+    <div class="card">
+      <div class="card-header"><strong>Ruang dengan Pemakaian Terbesar</strong></div>
+      <div class="card-body">
+        <table id="topTable">
+          <thead><tr><th>Ruang</th><th>Daya (W)</th><th>Arus (A)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><strong>Peringatan</strong></div>
+      <div class="card-body" id="alerts">
+        <div class="alert"><strong>Belum ada peringatan.</strong><div><small>Atur ambang batas di Settings.</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section class="card">
+    <div class="card-header"><strong>Settings</strong></div>
+    <div class="card-body">
+      <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+        <label>Ambang Daya/W per Ruang
+          <input id="thPower" class="input" type="number" min="100" step="50" placeholder="mis. 600" />
+        </label>
+        <label>Interval Update (detik)
+          <input id="intervalSec" class="input" type="number" min="1" value="1" />
+        </label>
+        <label>Mode Data
+          <select id="modeSel" class="input">
+            <option value="demo">DEMO (simulasi)</option>
+            <option value="live">LIVE (ambil dari URL)</option>
+          </select>
+        </label>
+        <label>Live Data URL (opsional)
+          <input id="liveUrl" class="input" type="url" placeholder="https://server-kamu/api/power" />
+        </label>
+        <label>Nama Ruang (pisah koma)
+          <input id="roomList" class="input" type="text" placeholder="X TJKT 1, Lab Komputer, Perpustakaan" />
+        </label>
+        <div style="align-self:end;display:flex;gap:10px">
+          <button id="saveSettings" class="btn">Simpan</button>
+          <button id="loadDemoRooms" class="btn">Pakai Contoh Ruang</button>
+        </div>
+      </div>
+      <details style="margin-top:12px"><summary><strong>Format JSON untuk mode LIVE</strong></summary>
+        <pre style="white-space:pre-wrap;color:var(--muted);margin-top:8px">
+GET <em>Live Data URL</em> → balikan JSON seperti ini:
+{
+  "timestamp": "2025-10-15T10:10:10Z",
+  "voltage": 220,
+  "power_factor": 0.95,
+  "rooms": [
+    {"name":"Kelas X TJKT 1","power": 320, "current": 1.45},
+    {"name":"Lab Komputer","power": 780, "current": 3.55},
+    {"name":"Perpustakaan","power": 210, "current": 0.95}
+  ]
+}
+        </pre>
+      </details>
+    </div>
+  </section>
+
+  <footer>© 2025 Monitoring Listrik Sekolah</footer>
+</main>
+
+<script>
+/* ===== Theme ===== */
+const root = document.documentElement;
+const setTheme = (light)=>{ root.classList.toggle('light', light); localStorage.setItem('theme-light', light?'1':'0'); }
+setTheme(localStorage.getItem('theme-light')==='1');
+document.getElementById('toggleTheme').onclick=()=>setTheme(!root.classList.contains('light'));
+
+/* ===== State ===== */
+let rooms = ['X TJKT 1','Lab Komputer','Perpustakaan','Ruang Guru','Aula'];
+let powerThreshold = Number(localStorage.getItem('th-power')) || 600;
+let updateSec = Number(localStorage.getItem('interval-sec')) || 1;
+let mode = localStorage.getItem('mode') || 'demo';
+let liveUrl = localStorage.getItem('live-url') || '';
+
+/* ===== UI init ===== */
+const els = {
+  ts: document.getElementById('tsNow'),
+  p: document.getElementById('pNow'),
+  i: document.getElementById('iNow'),
+  v: document.getElementById('vNow'),
+  pf: document.getElementById('pfNow'),
+  kwh: document.getElementById('kwhNow'),
+  roomSel: document.getElementById('roomSelect'),
+  bar: document.getElementById('barChart'),
+  line: document.getElementById('lineChart'),
+  table: document.querySelector('#topTable tbody'),
+  alerts: document.getElementById('alerts'),
+  intervalLabel: document.getElementById('intervalLabel'),
+  modeInfo: document.getElementById('modeInfo')
+};
+function fillRoomSelect() {
+  els.roomSel.innerHTML = '<option value="ALL">Semua Ruang</option>' + rooms.map(r=>`<option>${r}</option>`).join('');
+}
+fillRoomSelect();
+
+/* ===== Charts ===== */
+const lineChart = new Chart(els.line.getContext('2d'),{
+  type:'line',
+  data:{labels:[],datasets:[{label:'Daya (W)', data:[], tension:.25}]},
+  options:{animation:false, plugins:{legend:{display:false}}, scales:{x:{display:false}}}
+});
+const barChart = new Chart(els.bar.getContext('2d'),{
+  type:'bar',
+  data:{labels:rooms, datasets:[{label:'W', data:rooms.map(()=>0)}]},
+  options:{animation:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
+});
+
+/* ===== Data store (ringkas) ===== */
+let energyWh = 0;
+let lastTs = Date.now();
+let history = []; // {t, room, power, current}
+
+/* ===== Demo generator ===== */
+function demoSample(){
+  const voltage = 220 + (Math.random()*4-2);
+  const pf = 0.92 + (Math.random()*0.06-0.03);
+  const perRoom = rooms.map(name=>{
+    // base load per room
+    const base = { 'Lab Komputer':700, 'Aula':500 }[name] || 250;
+    const jitter = base * (0.85 + Math.random()*0.3);
+    const power = Math.round(jitter);
+    const current = +(power/voltage).toFixed(2);
+    return {name, power, current};
+  });
+  return {
+    timestamp: new Date().toISOString(),
+    voltage: +voltage.toFixed(0),
+    power_factor: +pf.toFixed(2),
+    rooms: perRoom
+  };
+}
+
+/* ===== Fetch live ===== */
+async function fetchLive(){
+  try{
+    const res = await fetch(liveUrl, {cache:'no-store'});
+    if(!res.ok) throw new Error(res.status+' '+res.statusText);
+    return await res.json();
+  }catch(e){
+    console.error(e);
+    addAlert('Gagal ambil data LIVE: '+e.message);
+    return null;
+  }
+}
+
+/* ===== Render ===== */
+function addAlert(msg){
+  const div = document.createElement('div');
+  div.className='alert';
+  div.innerHTML = `<strong>${msg}</strong><div><small>${new Date().toLocaleString()}</small></div>`;
+  if(els.alerts.firstElementChild && els.alerts.firstElementChild.textContent.includes('Belum ada')) els.alerts.innerHTML='';
+  els.alerts.prepend(div);
+}
+function updateUI(sample){
+  const ts = new Date(sample.timestamp);
+  els.ts.textContent = ts.toLocaleTimeString();
+  // current room filter
+  const pick = els.roomSel.value;
+  const arr = pick==='ALL' ? sample.rooms : sample.rooms.filter(r=>r.name===pick);
+  // totals
+  const totP = arr.reduce((a,b)=>a+b.power,0);
+  const totI = arr.reduce((a,b)=>a+b.current,0);
+  els.p.textContent = totP.toFixed(0);
+  els.i.textContent = totI.toFixed(2)+' A';
+  els.v.textContent = sample.voltage+' V';
+  els.pf.textContent = sample.power_factor.toFixed(2);
+
+  // energy calc (Wh → kWh)
+  const now = Date.now();
+  const dt_h = (now - lastTs)/3600000; lastTs = now;
+  energyWh += totP * dt_h;
+  els.kwh.textContent = (energyWh/1000).toFixed(3);
+
+  // line chart
+  const L=60; // last 60 points
+  lineChart.data.labels.push('');
+  lineChart.data.datasets[0].data.push(totP);
+  if(lineChart.data.labels.length>L){ lineChart.data.labels.shift(); lineChart.data.datasets[0].data.shift(); }
+  lineChart.update('none');
+
+  // bar chart per room
+  barChart.data.labels = sample.rooms.map(r=>r.name);
+  barChart.data.datasets[0].data = sample.rooms.map(r=>r.power);
+  barChart.update('none');
+
+  // table top usage
+  const top = [...sample.rooms].sort((a,b)=>b.power-a.power).slice(0,6);
+  els.table.innerHTML = top.map(r=>`<tr><td>${r.name}</td><td>${r.power}</td><td>${r.current}</td></tr>`).join('');
+
+  // alerts
+  sample.rooms.forEach(r=>{
+    if(r.power>powerThreshold) addAlert(`⚠️ ${r.name} melewati ambang (${r.power} W > ${powerThreshold} W)`);
+  });
+
+  // history store
+  sample.rooms.forEach(r=>history.push({t:ts.toISOString(), room:r.name, power:r.power, current:r.current}));
+}
+
+/* ===== Loop ===== */
+let timer=null;
+function startLoop(){
+  clearInterval(timer);
+  els.intervalLabel.textContent = updateSec+'s';
+  els.modeInfo.innerHTML = `Mode: <b>${mode.toUpperCase()}${mode==='live'?' (ambil data)':' (simulasi data)'}</b>`;
+  timer=setInterval(async()=>{
+    const sample = mode==='live' && liveUrl ? await fetchLive() : demoSample();
+    if(!sample) return;
+    // jika pengguna mengubah daftar ruang, sinkronkan
+    const newNames = sample.rooms.map(r=>r.name);
+    if(JSON.stringify(newNames)!==JSON.stringify(rooms)){
+      rooms = newNames; fillRoomSelect();
+    }
+    updateUI(sample);
+  }, updateSec*1000);
+}
+startLoop();
+
+/* ===== Settings bindings ===== */
+const thPowerEl = document.getElementById('thPower');
+const intervalEl = document.getElementById('intervalSec');
+const modeEl = document.getElementById('modeSel');
+const urlEl = document.getElementById('liveUrl');
+const roomsEl = document.getElementById('roomList');
+const saveBtn = document.getElementById('saveSettings');
+const demoBtn = document.getElementById('loadDemoRooms');
+
+thPowerEl.value = powerThreshold;
+intervalEl.value = updateSec;
+modeEl.value = mode;
+urlEl.value = liveUrl;
+roomsEl.value = '';
+
+saveBtn.onclick = ()=>{
+  powerThreshold = Number(thPowerEl.value)||powerThreshold;
+  updateSec = Math.max(1, Number(intervalEl.value)||updateSec);
+  mode = modeEl.value;
+  liveUrl = urlEl.value.trim();
+  const list = roomsEl.value.split(',').map(s=>s.trim()).filter(Boolean);
+  if(list.length){ rooms = list; fillRoomSelect(); barChart.data.labels = rooms; barChart.update(); }
+
+  localStorage.setItem('th-power', powerThreshold);
+  localStorage.setItem('interval-sec', updateSec);
+  localStorage.setItem('mode', mode);
+  localStorage.setItem('live-url', liveUrl);
+  addAlert('Settings disimpan.');
+  startLoop();
+};
+demoBtn.onclick = ()=>{ rooms = ['X TJKT 1','Lab Komputer','Perpustakaan','Ruang Guru','Aula']; roomsEl.value = rooms.join(', '); }
+
+/* ===== Export / Print ===== */
+document.getElementById('printBtn').onclick=()=>window.print();
+document.getElementById('exportCsv').onclick=()=>{
+  const header='timestamp,room,power,current\n';
+  const rows=history.map(r=>`${r.t},${r.room},${r.power},${r.current}`).join('\n');
+  const blob=new Blob([header+rows],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='monitoring-listrik.csv'; a.click();
+  URL.revokeObjectURL(url);
+};
+
+/* ===== Quick tips integrasi ESP32 (opsional di console) ===== */
+console.log(`
+=== Integrasi cepat (opsional) ===
+1) Buat endpoint web yang mengembalikan JSON seperti contoh di “Settings”.
+2) Set "Live Data URL" ke endpoint tersebut.
+3) ESP32 kirim data via HTTP:
+   - Kirim total/ruang sebagai JSON (power, current) tiap detik/n detik.
+Atau gunakan MQTT over WebSocket + broker publik, lalu tunneling ke web app (butuh adapter).
+`);
+</script>
+</body>
+</html>
