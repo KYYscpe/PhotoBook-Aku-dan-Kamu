@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Untuk Kamu 🤍</title>
+  <meta name="description" content="Website kecil yang aku bikin khusus buat kamu." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Background canvas -->
+  <canvas id="sky"></canvas>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span class="brand-title">Untuk <span id="herName">Kamu</span></span>
+    </div>
+    <nav class="nav">
+      <a href="#story">Cerita</a>
+      <a href="#gallery">Foto</a>
+      <a href="#letter">Surat</a>
+      <a href="#music">Musik</a>
+    </nav>
+    <button class="ghost-btn" id="toggleMode" aria-label="Toggle mode">
+      <span class="icon">✦</span>
+      <span class="label">Glow</span>
+    </button>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="chip reveal">ini buat kamu, yang paling aku sayang</p>
+
+        <h1 class="headline reveal">
+          Aku suka cara kamu bikin hari biasa<br/>
+          jadi <span class="grad">berasa spesial</span>.
+        </h1>
+
+        <p class="subhead reveal">
+          Bukan hadiah mahal. Cuma website kecil yang isinya: kamu, kita, dan hal-hal yang bikin aku bersyukur.
+        </p>
+
+        <div class="cta-row reveal">
+          <button class="primary-btn" id="btnHearts">Pencet ini 💗</button>
+          <a class="secondary-btn" href="#letter">Buka suratnya</a>
+        </div>
+
+        <div class="mini-cards reveal">
+          <div class="mini-card">
+            <div class="mini-title">Alasan aku suka kamu</div>
+            <div class="mini-value" id="reasonText">karena kamu selalu bikin aku tenang.</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-title">Hari kita dimulai</div>
+            <div class="mini-value" id="sinceText">—</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-title">Mood hari ini</div>
+            <div class="mini-value" id="moodText">soft & warm ✨</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-photo reveal">
+        <!-- GANTI fotonya: simpan di folder img/ -->
+        <img src="1765984144147.jpg" alt="Foto kamu" />
+        <div class="photo-glow"></div>
+      </div>
+    </section>
+
+    <!-- STORY -->
+    <section id="story" class="section">
+      <div class="section-head">
+        <h2 class="title reveal">Cerita kecil tentang kita</h2>
+        <p class="desc reveal">
+          Aku simpan ini biar kapan pun kamu capek, kamu bisa balik ke sini dan ingat:
+          ada aku yang selalu dukung kamu.
+        </p>
+      </div>
+
+      <div class="timeline">
+        <article class="tcard reveal">
+          <div class="tbadge">01</div>
+          <h3>Hari pertama aku sadar</h3>
+          <p>
+            “Oh… ternyata aku nyaman banget.” Nyaman yang bikin pengin pulang, bukan pergi.
+          </p>
+        </article>
+
+        <article class="tcard reveal">
+          <div class="tbadge">02</div>
+          <h3>Momen yang bikin ketawa</h3>
+          <p>
+            Dari hal random pun kamu bisa bikin aku senyum. Kamu itu lucu tanpa usaha.
+          </p>
+        </article>
+
+        <article class="tcard reveal">
+          <div class="tbadge">03</div>
+          <h3>Janji sederhana</h3>
+          <p>
+            Aku mungkin nggak sempurna, tapi aku serius buat terus belajar jadi tempat aman kamu.
+          </p>
+        </article>
+      </div>
+
+      <div class="sparkline reveal">
+        <div class="spark"></div>
+        <p class="sparktext">scroll pelan ya, masih ada kejutan kecil ↓</p>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section id="gallery" class="section">
+      <div class="section-head">
+        <h2 class="title reveal">Galeri kamu (versi aku)</h2>
+        <p class="desc reveal">Klik fotonya buat lihat lebih besar. Aku suka semua versimu, yang ketawa sampai yang ngambek 😌</p>
+      </div>
+
+      <div class="gallery">
+        <!-- GANTI nama file sesuai foto kamu -->
+        <button class="gitem reveal" data-full="1765984144069.jpg" aria-label="Buka foto 1">
+          <img src="1765984144069.jpg" alt="Foto 1" />
+        </button>
+        <button class="gitem reveal" data-full="1765984144083.jpg" aria-label="Buka foto 2">
+          <img src="1765984144083.jpg" alt="Foto 2" />
+        </button>
+        <button class="gitem reveal" data-full="1765984144104.jpg" aria-label="Buka foto 3">
+          <img src="1765984144104.jpg" alt="Foto 3" />
+        </button>
+        <button class="gitem reveal" data-full="1765984144123.jpg" aria-label="Buka foto 4">
+          <img src="1765984144123.jpg" alt="Foto 4" />
+        </button>
+        <button class="gitem reveal" data-full="1765984144147.jpg" aria-label="Buka foto 5">
+          <img src="1765984144147.jpg" alt="Foto 5" />
+        </button>
+        <button class="gitem reveal" data-full="1765984144164.jpg" aria-label="Buka foto 6">
+          <img src="1765984144164.jpg" alt="Foto 6" />
+        </button>
+      </div>
+    </section>
+
+    <!-- LETTER -->
+    <section id="letter" class="section">
+      <div class="section-head">
+        <h2 class="title reveal">Surat buat kamu</h2>
+        <p class="desc reveal">Pencet “Buka” dan baca pelan-pelan ya.</p>
+      </div>
+
+      <div class="letter-wrap reveal">
+        <div class="letter-card" id="letterCard">
+          <div class="letter-top">
+            <div class="seal" aria-hidden="true">♡</div>
+            <div class="letter-meta">
+              <div class="to">Untuk: <span id="toName">Kamu</span></div>
+              <div class="from">Dari: <span id="fromName">Aku</span></div>
+            </div>
+          </div>
+
+          <div class="letter-body" id="letterBody" aria-hidden="true">
+            <p>
+              Hai, sayang.
+            </p>
+            <p>
+              Aku cuma mau bilang: terima kasih ya, udah jadi versi paling lembut dari “rumah”.
+              Kalau dunia lagi ribut, kamu tetap bisa bikin aku tenang.
+            </p>
+            <p>
+              Aku sayang kamu, bukan karena semuanya selalu mudah… tapi karena bareng kamu,
+              aku pengin bertahan dan tumbuh.
+            </p>
+            <p class="sign">
+              — selalu,<br/>
+              <span id="signName">Aku</span>
+            </p>
+          </div>
+
+          <div class="letter-actions">
+            <button class="primary-btn" id="openLetter">Buka ✉️</button>
+            <button class="ghost-btn" id="closeLetter" disabled>Tutup</button>
+          </div>
+        </div>
+
+        <div class="note reveal">
+          <h3>Catatan kecil</h3>
+          <p>
+            Kamu boleh ganti isi suratnya di file <code>index.html</code> (bagian <em>letter-body</em>).
+            Biar lebih “kita banget”.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MUSIC -->
+    <section id="music" class="section">
+      <div class="section-head">
+        <h2 class="title reveal">Musik biar makin kerasa</h2>
+        <p class="desc reveal">Kalau kamu punya lagu kita, taruh file mp3 di folder dan ganti src-nya.</p>
+      </div>
+
+      <div class="music-card reveal">
+        <div class="music-left">
+          <div class="music-title">Lagu kecil untuk kamu</div>
+          <div class="music-sub">play kalau kamu lagi pengin suasana yang tenang</div>
+        </div>
+
+        <audio id="player" controls preload="none">
+          <!-- GANTI: taruh file musik di folder, misal: song.mp3 -->
+          <source src="Say Yes.mp3" type="audio/mpeg">
+          Browser kamu tidak mendukung audio.
+        </audio>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>dibikin dengan hati, bukan buru-buru. 🤍</p>
+    </footer>
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lb-close" id="lbClose" aria-label="Tutup">✕</button>
+    <img id="lbImg" alt="Foto besar" />
+    <div class="lb-hint">klik di luar foto untuk menutup</div>
+  </div>
+
+  <!-- Floating hearts container -->
+  <div id="hearts" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
