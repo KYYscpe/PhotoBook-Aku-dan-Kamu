@@ -1,0 +1,55 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uploader → Deploy Vercel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>Upload Folder → Dapat URL</h1>
+
+      <div class="row">
+        <label class="lbl" for="name">Nama deployment</label>
+        <input id="name" class="in" placeholder="mis: untuk-kita" autocomplete="off" />
+      </div>
+
+      <div class="row">
+        <div class="lbl">Pilih folder project</div>
+        <div class="actions">
+          <button id="pickDir" class="btn ghost" type="button">Pilih Folder (Directory Picker)</button>
+          <label class="btn filebtn">
+            Pilih Folder (Fallback)
+            <input id="picker" type="file" webkitdirectory directory multiple hidden />
+          </label>
+        </div>
+        <div id="picked" class="hint">Belum ada folder dipilih</div>
+      </div>
+
+      <div class="row">
+        <div class="lbl">File terbaca</div>
+        <pre id="filelist" class="out small"></pre>
+      </div>
+
+      <button id="deploy" class="btn primary" disabled type="button">Deploy</button>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <div class="lbl">Log</div>
+        <pre id="out" class="out"></pre>
+      </div>
+
+      <div class="row">
+        <div class="lbl">URL</div>
+        <a id="url" class="url" href="#" target="_blank" rel="noreferrer"></a>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

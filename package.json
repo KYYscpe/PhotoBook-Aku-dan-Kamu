@@ -1,0 +1,8 @@
+{
+  "name": "vercel-folder-uploader",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "@vercel/blob": "^2.0.0"
+  }
+}
